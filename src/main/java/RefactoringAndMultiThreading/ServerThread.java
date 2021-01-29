@@ -1,17 +1,14 @@
 package RefactoringAndMultiThreading;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ServerThread implements Runnable {
 
+public class ServerThread implements Runnable {
     private final Socket socket;
     private final static List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css",
             "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
@@ -25,12 +22,21 @@ public class ServerThread implements Runnable {
         try (final var in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              final var out = new BufferedOutputStream(socket.getOutputStream());
         ) {
+
             final var requestLine = in.readLine();
+
             final var parts = requestLine.split(" ");
             if (parts.length != 3) {
                 return;
             }
-            final var path = parts[1];
+            final var pathAndQuery = parts[1];
+
+            System.out.println("Параметры");
+            var parsResultParams = Request.getQueryParams(pathAndQuery);
+            var path = Request.getQueryParamsPath(pathAndQuery);
+            System.out.println(parsResultParams);
+            System.out.println(path);
+
             if (!validPaths.contains(path)) {
                 out.write((
                         "HTTP/1.1 404 Not Found\r\n" +
@@ -58,6 +64,7 @@ public class ServerThread implements Runnable {
                 ).getBytes());
                 out.write(content);
                 out.flush();
+
                 return;
             }
             final var lenght = Files.size(filePath);
@@ -74,4 +81,5 @@ public class ServerThread implements Runnable {
             ioException.printStackTrace();
         }
     }
+
 }

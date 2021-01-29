@@ -8,9 +8,11 @@ import java.util.concurrent.Executors;
 public class Server {
 
     private final int portNumber;
+
     public Server(int portNumber) {
         this.portNumber = portNumber;
     }
+
     public void connectServer() throws IOException {
         final var serverSocket = new ServerSocket(portNumber);
         final var threadPool = Executors.newFixedThreadPool(64);
